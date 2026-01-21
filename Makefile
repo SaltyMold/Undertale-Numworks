@@ -24,8 +24,10 @@ endef
 
 src = $(addprefix src/,\
   libs/storage.c \
+  app.c \
+  display.c \
+  assets/heart.c \
   main.c \
-  file.cpp \
 )
 
 CFLAGS = -std=c99
