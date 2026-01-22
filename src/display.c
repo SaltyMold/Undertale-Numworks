@@ -19,11 +19,11 @@ void display_heart(eadk_point_t point) {
 ---------------------
 */
 
-void display_box(int w, int h) {
-    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - w/2, MIDDLE_Y - h/2, w, 2}, eadk_color_white); // top
-    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - w/2, MIDDLE_Y + h/2 - 2, w, 2}, eadk_color_white); // bottom
-    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - w/2, MIDDLE_Y - h/2, 2, h}, eadk_color_white); // left
-    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X + w/2 - 2, MIDDLE_Y - h/2, 2, h}, eadk_color_white); // right
+void display_box(eadk_size_t size) {
+    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - size.w/2, MIDDLE_Y - size.h/2, size.w, 2}, eadk_color_white); // top
+    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - size.w/2, MIDDLE_Y + size.h/2 - 2, size.w, 2}, eadk_color_white); // bottom
+    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X - size.w/2, MIDDLE_Y - size.h/2, 2, size.h}, eadk_color_white); // left
+    eadk_display_push_rect_uniform((eadk_rect_t){MIDDLE_X + size.w/2 - 2, MIDDLE_Y - size.h/2, 2, size.h}, eadk_color_white); // right
 }
 
 static const int FONT_HEIGHT = 17;
@@ -95,6 +95,11 @@ static const bool *get_font_data(char c, int *out_width) {
         default: *out_width = 6; return NULL;
     }
 }
+
+/*
+!!!!!
+need to be careful to not exceed 128KB of ram or crash
+*/
 
 void display_string(const char *s, eadk_point_t point, eadk_color_t fg, eadk_color_t bg, int spacing) {
     if (!s || !*s) return;
