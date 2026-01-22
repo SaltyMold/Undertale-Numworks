@@ -30,6 +30,11 @@ typedef struct {
 } eadk_point_t;
 
 typedef struct {
+  uint16_t w;
+  uint16_t h;
+} eadk_size_t;
+
+typedef struct {
   uint16_t x;
   uint16_t y;
   uint16_t width;
@@ -37,6 +42,9 @@ typedef struct {
 } eadk_rect_t;
 
 // Keyboard and Events
+
+#define MIDDLE_X 160
+#define MIDDLE_Y 120
 
 #define EADK_SCREEN_WIDTH 320
 #define EADK_SCREEN_HEIGHT 240
