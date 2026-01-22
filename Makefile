@@ -27,6 +27,7 @@ src = $(addprefix src/,\
   app.c \
   display.c \
   assets/heart.c \
+  assets/font.c \
   main.c \
 )
 
