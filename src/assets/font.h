@@ -1,5 +1,5 @@
-#ifndef FONT_H_
-#define FONT_H_
+#ifndef _FONT_H_
+#define _FONT_H_
 
 #include <stdbool.h>
 
@@ -85,4 +85,4 @@ extern const bool font_uppercase_y[17][9];
 extern const bool font_uppercase_z[17][10];
 extern const bool font_zero[17][10];
 
-#endif
+#endif 

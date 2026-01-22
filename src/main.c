@@ -2,6 +2,7 @@
 #include "libs/storage.h"
 #include "app.h"
 #include "display.h"
+#include "assets/font.h"
 #include <string.h>
 
 #define SIMULATOR 1 // no syscall and storage
@@ -16,43 +17,48 @@ eadk_keyboard_state_t state;
 int target_fps = 30;
 
 int main(void) {
-    #if SIMULATOR == 0
-    // save and quit with home
-    // Disable On/Off and Home kernel handling
-    __asm__ volatile("svc #54"); // SVC_USB_WILL_EXECUTE_DFU
-    __asm__ volatile("svc #44"); // SVC_POWER_SUSPEND
+	#if SIMULATOR == 0
+	// save and quit with home
+	// Disable On/Off and Home kernel handling
+	__asm__ volatile("svc #54"); // SVC_USB_WILL_EXECUTE_DFU
+	__asm__ volatile("svc #44"); // SVC_POWER_SUSPEND
 
-    load_data();
-    #endif
+	load_data();
+	#endif
 
-    display_screen_bg();
-    display_heart((eadk_point_t){MIDDLE_X, MIDDLE_Y});
-    display_box(150, 150);
+	display_screen_bg();
+	display_heart((eadk_point_t){MIDDLE_X, MIDDLE_Y});
+	display_box(100, 100);
+	//display_string("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n.:,;(*!?}^)#${%&-+@", (eadk_point_t){0, 0}, eadk_color_white, eadk_color_black, 1);
+	display_string_transparant("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n.:,;(*!?}^)#${%&-+@", (eadk_point_t){0, 0}, eadk_color_white, 1);
 
-    while (1) {
-        uint64_t start_frame_ts_ms = eadk_timing_millis();
+	while (1) {
+		uint64_t start_frame_ts_ms = eadk_timing_millis();
 
-        // ----------------------------
+		// ----------------------------
 
-        state = eadk_keyboard_scan();
+		state = eadk_keyboard_scan();
 
-        if (eadk_keyboard_key_down(state, eadk_key_home)) {
-            #if SIMULATOR == 0
-            save_data();
-            // Restore On/Off and Home kernel handling
-            __asm__ volatile("svc #51"); // SVC_USB_DID_EXECUTE_DFU
-            #endif
+		if (eadk_keyboard_key_down(state, eadk_key_home)) {
+			#if SIMULATOR == 0
+			save_data();
+			// Restore On/Off and Home kernel handling
+			__asm__ volatile("svc #51"); // SVC_USB_DID_EXECUTE_DFU
+			#endif
 
-            return 0;
-        }
-        if (eadk_keyboard_key_down(state, eadk_key_sqrt)) {
-			volatile int *ptr = (int *)0xFFFFFFFF;
-        	*ptr = 0;
+			return 0;
 		}
-		
-        // ----------------------------
+		if (eadk_keyboard_key_down(state, eadk_key_sqrt)) {
+			volatile int *ptr = (int *)0xFFFFFFFF;
+			*ptr = 0;
+		}
 
-        uint64_t end_frame_ts_ms = eadk_timing_millis();
+
+		
+		
+		// ----------------------------
+
+		uint64_t end_frame_ts_ms = eadk_timing_millis();
 		int frame_duration_ms = end_frame_ts_ms - start_frame_ts_ms;
 		int sleep_ms = (1000 / target_fps) > frame_duration_ms ? (1000 / target_fps) - frame_duration_ms : 0;
 
@@ -84,8 +90,8 @@ int main(void) {
 		}
 
 		eadk_timing_msleep(sleep_ms);
-    }
+	}
 
-    return 0;
+	return 0;
 }
 

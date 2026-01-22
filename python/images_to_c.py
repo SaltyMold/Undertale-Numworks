@@ -22,7 +22,7 @@ def image_to_matrix(img_path: Path) -> Tuple[int, int, list]:
 		row = []
 		for x in range(w):
 			p = pixels[y * w + x]
-			v = 255 if p else 0
+			v = 0 if p else 255
 			row.append(v)
 		matrix.append(row)
 	return w, h, matrix
@@ -43,7 +43,7 @@ def write_aggregate_files(base: str, entries: list, out_dir: Path) -> None:
 		for name, w, h, _ in entries:
 			symbol = f"{base}_{name}"
 			fh.write(f"extern const bool {symbol}[{h}][{w}];\n")
-		fh.write("\n#endif /* {guard} */\n")
+		fh.write("\n#endif \n")
 
 	with open(c_path, "w", encoding="utf-8") as fc:
 		fc.write(f"#include \"{h_name}\"\n\n")
