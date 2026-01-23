@@ -5,7 +5,6 @@
 #include "assets/font.h"
 #include "game.h"
 #include "utils.h"
-#include <string.h>
 
 #define SIMULATOR 1 // no syscall and storage
 
@@ -16,10 +15,32 @@ const uint32_t eadk_api_level  __attribute__((section(".rodata.eadk_api_level"))
 SaveData game_save;
 
 // game.c
-Player player = {
+Player player_stats = {
 	.state = red_heart,
 	.pos = {160, 120},
-	.box_size = {100, 100}
+	.hp = 46,
+	.lv = 19
+};
+Player last_player_stats = {
+	.state = red_heart,
+	.pos = {160, 120},
+	.hp = 46,
+	.lv = 19
+};
+
+Game game_stats = {
+	.box_size = {250, 100},
+	.stats_y = 150
+};
+
+Game last_game_stats = {
+	.box_size = {250, 100},
+	.stats_y = 150
+};
+
+Game target_game_stats = {
+	.box_size = {50, 150},
+	.stats_y = 220
 };
 
 eadk_keyboard_state_t keyboard_state;
@@ -39,15 +60,25 @@ int main(void) {
 	__asm__ volatile("svc #44"); // SVC_POWER_SUSPEND
 
 	load_data();
+	
+	#else
+	display_screen_bg();
+	for (int i = 0; i < 20; ++i) {
+		eadk_timing_msleep(50); 
+		eadk_keyboard_scan();
+	}
 	#endif
 	
-	//display_string_transparant("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n.:,;(*!?}^)#${%&-+@", (eadk_point_t){0, 0}, eadk_color_white, 1);
+	//display_string_transparant("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n.:,;(*!?}^)#${%&-+@", (eadk_point_t){0, 0}, eadk_color_white, 0);
 
 	while (1) {
 		start_frame_ts_ms = eadk_timing_millis();
 		keyboard_state = eadk_keyboard_scan();
 
 		//-----------------------------
+
+		last_player_stats = player_stats;
+		last_game_stats = game_stats;
 
 		update_game();
 		update_screen();
