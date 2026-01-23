@@ -55,6 +55,7 @@ extern const bool font_right_parenthesis[17][8];
 extern const bool font_semicolon[17][4];
 extern const bool font_seven[17][10];
 extern const bool font_six[17][10];
+extern const bool font_slash[17][11];
 extern const bool font_three[17][10];
 extern const bool font_two[17][10];
 extern const bool font_uppercase_a[17][10];
