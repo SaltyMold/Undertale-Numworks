@@ -72,7 +72,7 @@ static const bool *get_font_data(char c, int *out_width) {
     }
 
     switch (c) {
-        case ' ': *out_width = 4; return NULL;
+        case ' ': *out_width = 8; return NULL;
         case '.': *out_width = 4; return &font_point[0][0];
         case ':': *out_width = 4; return &font_colon[0][0];
         case ',': *out_width = 4; return &font_comma[0][0];
@@ -96,40 +96,10 @@ static const bool *get_font_data(char c, int *out_width) {
     }
 }
 
-/*
-!!!!!
-need to be careful to not exceed 128KB of ram or crash
-*/
-
 void display_string(const char *s, eadk_point_t point, eadk_color_t fg, eadk_color_t bg, int spacing) {
     if (!s || !*s) return;
-
+    if (spacing < 0) spacing = 0;
     int h = FONT_HEIGHT;
-    int max_w = 0;
-    int cur_line_w = 0;
-    int lines = 1;
-    for (const char *p = s; *p; ++p) {
-        if (*p == '\n') {
-            if (cur_line_w > max_w) max_w = cur_line_w;
-            cur_line_w = 0;
-            ++lines;
-            continue;
-        }
-        int w = 0;
-        (void)get_font_data(*p, &w);
-        cur_line_w += w;
-    }
-    if (cur_line_w > max_w) max_w = cur_line_w;
-
-    if (max_w <= 0 || lines <= 0) return;
-
-    int total_w = max_w;
-    int total_h = h * lines;
-    size_t n = (size_t)total_w * (size_t)total_h;
-    eadk_color_t *pixels = malloc(n * sizeof *pixels);
-    if (!pixels) return;
-
-    for (size_t i = 0; i < n; ++i) pixels[i] = bg;
 
     int line_idx = 0;
     int cur_x = 0;
@@ -144,52 +114,42 @@ void display_string(const char *s, eadk_point_t point, eadk_color_t fg, eadk_col
 
         int w = 0;
         const bool *data = get_font_data(c, &w);
-        if (data && w > 0) {
-            for (int yy = 0; yy < h; ++yy) {
-                for (int xx = 0; xx < w; ++xx) {
-                    size_t src_idx = (size_t)yy * (size_t)w + (size_t)xx;
-                    if (data[src_idx]) {
-                        size_t dst_idx = ((size_t)line_idx * (size_t)h + (size_t)yy) * (size_t)total_w + (size_t)(cur_x + xx);
-                        pixels[dst_idx] = fg;
-                    }
+
+        if (!data || w <= 0) {
+            if (w > 0) {
+                eadk_display_push_rect_uniform((eadk_rect_t){(uint16_t)(point.x + cur_x), (uint16_t)(point.y + line_idx * h), (uint16_t)w, (uint16_t)h}, bg);
+            }
+            cur_x += w + spacing;
+            continue;
+        }
+
+        size_t n = (size_t)w * (size_t)h;
+        eadk_color_t *pixels = malloc(n * sizeof *pixels);
+        if (!pixels) return;
+
+        for (size_t i = 0; i < n; ++i) pixels[i] = bg;
+
+        for (int yy = 0; yy < h; ++yy) {
+            for (int xx = 0; xx < w; ++xx) {
+                size_t src_idx = (size_t)yy * (size_t)w + (size_t)xx;
+                if (data[src_idx]) {
+                    size_t dst_idx = (size_t)yy * (size_t)w + (size_t)xx;
+                    pixels[dst_idx] = fg;
                 }
             }
         }
-        cur_x += w;
-    }
 
-    eadk_display_push_rect((eadk_rect_t){(uint16_t)point.x, (uint16_t)point.y, (uint16_t)total_w, (uint16_t)total_h}, pixels);
-    free(pixels);
+        eadk_display_push_rect((eadk_rect_t){(uint16_t)(point.x + cur_x), (uint16_t)(point.y + line_idx * h), (uint16_t)w, (uint16_t)h}, pixels);
+        free(pixels);
+
+        cur_x += w + spacing;
+    }
 }
 
 void display_string_transparant(const char *s, eadk_point_t point, eadk_color_t fg, int spacing) {
     if (!s || !*s) return;
-
+    if (spacing < 0) spacing = 0;
     int h = FONT_HEIGHT;
-    int max_w = 0;
-    int cur_line_w = 0;
-    int lines = 1;
-    for (const char *p = s; *p; ++p) {
-        if (*p == '\n') {
-            if (cur_line_w > max_w) max_w = cur_line_w;
-            cur_line_w = 0;
-            ++lines;
-            continue;
-        }
-        int w = 0;
-        (void)get_font_data(*p, &w);
-        cur_line_w += w;
-    }
-    if (cur_line_w > max_w) max_w = cur_line_w;
-    if (max_w <= 0 || lines <= 0) return;
-
-    int total_w = max_w;
-    int total_h = h * lines;
-    size_t n = (size_t)total_w * (size_t)total_h;
-    eadk_color_t *pixels = malloc(n * sizeof *pixels);
-    if (!pixels) return;
-
-    eadk_display_pull_rect((eadk_rect_t){(uint16_t)point.x, (uint16_t)point.y, (uint16_t)total_w, (uint16_t)total_h}, pixels);
 
     int line_idx = 0;
     int cur_x = 0;
@@ -204,20 +164,33 @@ void display_string_transparant(const char *s, eadk_point_t point, eadk_color_t 
 
         int w = 0;
         const bool *data = get_font_data(c, &w);
-        if (data && w > 0) {
-            for (int yy = 0; yy < h; ++yy) {
-                for (int xx = 0; xx < w; ++xx) {
-                    size_t src_idx = (size_t)yy * (size_t)w + (size_t)xx;
-                    if (data[src_idx]) {
-                        size_t dst_idx = ((size_t)line_idx * (size_t)h + (size_t)yy) * (size_t)total_w + (size_t)(cur_x + xx);
-                        pixels[dst_idx] = fg;
-                    }
+
+        if (!data || w <= 0) {
+            if (w > 0) {
+            }
+            cur_x += w + spacing;
+            continue;
+        }
+
+        size_t n = (size_t)w * (size_t)h;
+        eadk_color_t *pixels = malloc(n * sizeof *pixels);
+        if (!pixels) return;
+
+        eadk_display_pull_rect((eadk_rect_t){(uint16_t)(point.x + cur_x), (uint16_t)(point.y + line_idx * h), (uint16_t)w, (uint16_t)h}, pixels);
+
+        for (int yy = 0; yy < h; ++yy) {
+            for (int xx = 0; xx < w; ++xx) {
+                size_t src_idx = (size_t)yy * (size_t)w + (size_t)xx;
+                if (data[src_idx]) {
+                    size_t dst_idx = (size_t)yy * (size_t)w + (size_t)xx;
+                    pixels[dst_idx] = fg;
                 }
             }
         }
-        cur_x += w;
-    }
 
-    eadk_display_push_rect((eadk_rect_t){(uint16_t)point.x, (uint16_t)point.y, (uint16_t)total_w, (uint16_t)total_h}, pixels);
-    free(pixels);
+        eadk_display_push_rect((eadk_rect_t){(uint16_t)(point.x + cur_x), (uint16_t)(point.y + line_idx * h), (uint16_t)w, (uint16_t)h}, pixels);
+        free(pixels);
+
+        cur_x += w + spacing;
+    }
 }
