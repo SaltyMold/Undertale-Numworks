@@ -2,4 +2,4 @@
 An Undertale clone for the Numworks calculator. 
 In development, beta version will be released soon.
 
-<img width="452" height="333" alt="image" src="https://github.com/user-attachments/assets/a6516282-d9a8-46f6-a993-30a3385722d1" />
+<img width="455" height="340" alt="image" src="https://github.com/user-attachments/assets/9e98232c-b0e2-4388-a0d6-5e620d1ef637" />
