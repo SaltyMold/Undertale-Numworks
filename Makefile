@@ -30,6 +30,8 @@ src = $(addprefix src/,\
   assets/font.c \
   utils.c \
   game.c \
+  entity.c \
+  attack.c \
   main.c \
 )
 
