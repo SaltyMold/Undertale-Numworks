@@ -1,5 +1,11 @@
 #include "app.h"
 
+//----------------------------
+
+SaveData game_save;
+
+//----------------------------
+
 void first_menu(){
     eadk_display_push_rect_uniform(eadk_screen_rect, eadk_color_white);
 

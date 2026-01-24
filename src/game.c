@@ -1,5 +1,37 @@
 #include "game.h"
 
+//----------------------------
+
+Player player_stats = {
+	.state = red_heart,
+	.pos = {160, 120},
+	.hp = 46,
+	.lv = 19
+};
+Player last_player_stats = {
+	.state = red_heart,
+	.pos = {160, 120},
+	.hp = 46,
+	.lv = 19
+};
+
+Game game_stats = {
+	.box_size = {250, 100},
+	.stats_y = 150
+};
+
+Game last_game_stats = {
+	.box_size = {250, 100},
+	.stats_y = 150
+};
+
+Game target_game_stats = {
+	.box_size = {50, 150},
+	.stats_y = 220
+};
+
+//----------------------------
+
 void keep_in_box(){
 	int center_x = MIDDLE_X;
 	int center_y = MIDDLE_Y;

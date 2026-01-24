@@ -221,7 +221,6 @@ void display_stats() {
 ---------------------
 */
 
-// Draw box using a specific stats Y (so we can compute overlap for old frames)
 void display_box_at(eadk_size_t size, int stats_y, eadk_color_t color) {
 	// move box up if overlapping with stats
 	int center_x = MIDDLE_X;
