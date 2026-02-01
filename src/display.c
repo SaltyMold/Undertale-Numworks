@@ -1,7 +1,7 @@
 #include "display.h"
 #include "assets/heart.h"
 #include "assets/font.h"
-#include "game.h"
+#include "entity.h"
 
 //---------------------
 
@@ -189,6 +189,16 @@ void display_yellow_heart(eadk_point_t point) {
 void display_purple_heart(eadk_point_t point) {
 	eadk_display_push_rect((eadk_rect_t){point.x-8, point.y-8, 16, 16}, purple_heart_pixels);
 }
+void display_heart(eadk_point_t point, player_state_t state) {
+	switch (state) {
+		case red_heart: display_red_heart(point); break;
+		case blue_heart: display_blue_heart(point); break;
+		case green_heart: display_green_heart(point); break;
+		case yellow_heart: display_yellow_heart(point); break;
+		case purple_heart: display_purple_heart(point); break;
+		default: display_red_heart(point); break;
+	}
+}
 
 void display_stats() {
 	int max_hp = 16 + 4 * player_stats.lv;
@@ -247,4 +257,23 @@ void display_box_at(eadk_size_t size, int stats_y, eadk_color_t color) {
 
 void display_box(eadk_size_t size, eadk_color_t color) {
 	display_box_at(size, game_stats.stats_y, color);
+}
+
+void display_entities() {
+	for (int i = 0; i < MAX_ENTITY; ++i) {
+		if (!entity_list[i].is_active) continue;
+		if (!entity_list[i].is_visible) continue;
+
+		if (entity_list[i].sprite != NULL) {
+			eadk_display_push_rect((eadk_rect_t){entity_list[i].pos.x, entity_list[i].pos.y, entity_list[i].size.w, entity_list[i].size.h}, entity_list[i].sprite);
+		} else {
+			eadk_display_push_rect_uniform((eadk_rect_t){entity_list[i].pos.x, entity_list[i].pos.y, entity_list[i].size.w, entity_list[i].size.h}, eadk_color_yellow);
+		}
+	}
+}
+
+void game_over(){
+	eadk_display_push_rect_uniform(eadk_screen_rect, eadk_color_black);
+	display_string_transparant("GAME OVER", (eadk_point_t){0, 0}, eadk_color_white, 0);
+	while (1) eadk_keyboard_scan();
 }

@@ -14,7 +14,6 @@ const uint32_t eadk_api_level  __attribute__((section(".rodata.eadk_api_level"))
 
 eadk_keyboard_state_t keyboard_state;
 
-uint8_t target_fps = 120;
 
 uint64_t start_frame_ts_ms;
 uint64_t end_frame_ts_ms;
@@ -39,6 +38,7 @@ int main(void) {
 	#endif
 
 	init_entities();
+	int entity = create_entity(true, 170, 120, 16, 16, 20, NULL);
 	
 	//display_string_transparant("abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ\n0123456789\n.:,;(*!?}^)#${%&-+@", (eadk_point_t){0, 0}, eadk_color_white, 0);
 
@@ -75,7 +75,7 @@ int main(void) {
 		// cap fps
 		end_frame_ts_ms = eadk_timing_millis();
 		frame_duration_ms = end_frame_ts_ms - start_frame_ts_ms;
-		sleep_ms = (1000 / target_fps) > frame_duration_ms ? (1000 / target_fps) - frame_duration_ms : 0;
+		sleep_ms = (1000 / TARGET_FPS) > frame_duration_ms ? (1000 / TARGET_FPS) - frame_duration_ms : 0;
 		
 		eadk_timing_msleep(sleep_ms);
 

@@ -32,6 +32,7 @@ src = $(addprefix src/,\
   game.c \
   entity.c \
   attack.c \
+  player.c \
   main.c \
 )
 

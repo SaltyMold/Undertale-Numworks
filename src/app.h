@@ -1,9 +1,6 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "libs/eadk.h"
-#include "libs/storage.h"
-
 #define SAVE_FILE "undertale.dat"
 
 typedef struct {

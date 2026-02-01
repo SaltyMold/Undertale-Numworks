@@ -1,70 +1,27 @@
 #include "game.h"
+#include "display.h"
+#include "player.h"
+#include "entity.h"
 
 //----------------------------
 
-Player player_stats = {
-	.state = red_heart,
-	.pos = {160, 120},
-	.hp = 46,
-	.lv = 19
-};
-Player last_player_stats = {
-	.state = red_heart,
-	.pos = {160, 120},
-	.hp = 46,
-	.lv = 19
-};
-
-Game game_stats = {
+game_t game_stats = {
 	.box_size = {250, 100},
 	.stats_y = 150
 };
-
-Game last_game_stats = {
+game_t last_game_stats = {
 	.box_size = {250, 100},
 	.stats_y = 150
 };
-
-Game target_game_stats = {
+game_t target_game_stats = {
 	.box_size = {50, 150},
 	.stats_y = 220
 };
 
 //----------------------------
 
-void keep_in_box(){
-	int center_x = MIDDLE_X;
-	int center_y = MIDDLE_Y;
-	int half_w = (int)game_stats.box_size.w / 2;
-	int half_h = (int)game_stats.box_size.h / 2;
-	
-	int bottom = center_y + half_h + 5;
-	if (bottom >= (int)game_stats.stats_y) {
-		int overlap = bottom - ((int)game_stats.stats_y - 1);
-		center_y -= overlap;
-	}
-
-	// left
-	if (player_stats.pos.x - 8 - 2 < (center_x - half_w)) player_stats.pos.x = center_x - half_w + 8 + 2;
-	// right
-	if (player_stats.pos.x + 8 + 2 > (center_x + half_w)) player_stats.pos.x = center_x + half_w - 8 - 2;
-	// top
-	if (player_stats.pos.y - 8 - 2 < (center_y - half_h)) player_stats.pos.y = center_y - half_h + 8 + 2;
-	// bottom
-	if (player_stats.pos.y + 8 + 2 > (center_y + half_h)) player_stats.pos.y = center_y + half_h - 8 - 2;
-}
-
-void input(){
-	if (eadk_keyboard_key_down(keyboard_state, eadk_key_left)) player_stats.dx = -1;
-	if (eadk_keyboard_key_down(keyboard_state, eadk_key_right)) player_stats.dx = 1;
-	if (eadk_keyboard_key_down(keyboard_state, eadk_key_up)) player_stats.dy = -1;
-	if (eadk_keyboard_key_down(keyboard_state, eadk_key_down)) player_stats.dy = 1;
-}
-
 void update_screen(){
-	//display_screen_bg();
-
-	display_red_heart(player_stats.pos);
+	display_heart(player_stats.pos, player_stats.state);
 
 	if (last_game_stats.box_size.w != game_stats.box_size.w || last_game_stats.box_size.h != game_stats.box_size.h){ // if box size changed
 		display_box_at(last_game_stats.box_size, last_game_stats.stats_y, eadk_color_black);
@@ -90,7 +47,22 @@ void update_game(){
 	player_stats.pos.y += player_stats.dy;
 	player_stats.dx = 0;
 	player_stats.dy = 0;
+	
 	keep_in_box();
+
+	// check collisions
+	int damage = check_entity_collisions();
+
+	if (player_stats.damage_cooldown > 0) {
+		player_stats.damage_cooldown--;
+	}
+
+	if (damage > 0 && player_stats.damage_cooldown <= 0) {
+		player_stats.hp -= damage;
+		player_stats.damage_cooldown = DAMAGE_COOLDOWN;
+	}
+
+	if (player_stats.hp <= 0) game_over();
 
 	// update box size
 	if (game_stats.box_size.w < target_game_stats.box_size.w) game_stats.box_size.w += BOX_SPEED;
@@ -101,6 +73,8 @@ void update_game(){
 	// update stats position
 	if (game_stats.stats_y < target_game_stats.stats_y) game_stats.stats_y += BOX_SPEED;
 	if (game_stats.stats_y > target_game_stats.stats_y) game_stats.stats_y -= BOX_SPEED;
+
+	display_entities();
 }
 
 void debug_mode(){
@@ -114,7 +88,7 @@ void debug_mode(){
 	snprintf(buf, sizeof(buf), "frame_duration_ms: %d", (int)(frame_duration_ms));
 	eadk_display_draw_string(buf, (eadk_point_t){0, 24}, false, eadk_color_black, eadk_color_white);
 
-	snprintf(buf, sizeof(buf), "target_fps: %d", target_fps);
+	snprintf(buf, sizeof(buf), "TARGET_FPS: %d", TARGET_FPS);
 	eadk_display_draw_string(buf, (eadk_point_t){0, 36}, false, eadk_color_black, eadk_color_white);
 
 	snprintf(buf, sizeof(buf), "sleep_ms: %d", (int)(sleep_ms));

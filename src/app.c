@@ -1,4 +1,6 @@
 #include "app.h"
+#include "libs/eadk.h"
+#include "libs/storage.h"
 
 //----------------------------
 
